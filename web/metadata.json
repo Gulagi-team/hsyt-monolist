@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Hồ sơ y tế - Medical Profile",
+  "description": "An application to manage your personal health records. Features include AI-powered analysis for lab results and prescriptions, an AI doctor chat for health inquiries based on your records, and a personal profile for medical information.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

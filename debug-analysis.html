@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Analysis API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .error { background-color: #ffe6e6; border-color: #ff9999; }
+        .success { background-color: #e6ffe6; border-color: #99ff99; }
+        .loading { background-color: #e6f3ff; border-color: #99ccff; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        textarea { width: 100%; height: 100px; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Debug Analysis API</h1>
+        
+        <div class="section">
+            <h3>1. Test Backend Connection</h3>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="connectionResult"></div>
+        </div>
+        
+        <div class="section">
+            <h3>2. Login/Register</h3>
+            <button onclick="testLogin()">Test Login</button>
+            <button onclick="testRegister()">Test Register</button>
+            <div id="authResult"></div>
+        </div>
+        
+        <div class="section">
+            <h3>3. Test Upload</h3>
+            <input type="file" id="fileInput" accept="image/*,.pdf">
+            <button onclick="testUpload()">Test Upload</button>
+            <div id="uploadResult"></div>
+        </div>
+        
+        <div class="section">
+            <h3>4. Test Analysis</h3>
+            <button onclick="testAnalysis()">Test Analysis</button>
+            <div id="analysisResult"></div>
+        </div>
+        
+        <div class="section">
+            <h3>5. Debug Logs</h3>
+            <textarea id="debugLogs" readonly></textarea>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+    </div>
+
+    <script>
+        let authToken = localStorage.getItem('debug_auth_token');
+        let uploadData = null;
+        
+        function log(message) {
+            const logs = document.getElementById('debugLogs');
+            logs.value += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLogs() {
+            document.getElementById('debugLogs').value = '';
+        }
+        
+        async function testConnection() {
+            const result = document.getElementById('connectionResult');
+            result.innerHTML = '<div class="loading">Testing connection...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = '<div class="success">✅ Backend connected: ' + data.message + '</div>';
+                    log('Backend connection successful');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Backend error: ' + response.status + '</div>';
+                    log('Backend connection failed: ' + response.status);
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Connection failed: ' + error.message + '</div>';
+                log('Connection error: ' + error.message);
+            }
+        }
+        
+        async function testLogin() {
+            const result = document.getElementById('authResult');
+            result.innerHTML = '<div class="loading">Testing login...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.data && data.data.token) {
+                    authToken = data.data.token;
+                    localStorage.setItem('debug_auth_token', authToken);
+                    result.innerHTML = '<div class="success">✅ Login successful</div>';
+                    log('Login successful, token: ' + authToken.substring(0, 20) + '...');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Login failed: ' + (data.message || 'Unknown error') + '</div>';
+                    log('Login failed: ' + JSON.stringify(data));
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Login error: ' + error.message + '</div>';
+                log('Login error: ' + error.message);
+            }
+        }
+        
+        async function testRegister() {
+            const result = document.getElementById('authResult');
+            result.innerHTML = '<div class="loading">Testing register...</div>';
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: 'test@example.com',
+                        password: 'password123',
+                        age: 30,
+                        bloodType: 'O+',
+                        allergies: 'None',
+                        currentConditions: 'Healthy'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.data && data.data.token) {
+                    authToken = data.data.token;
+                    localStorage.setItem('debug_auth_token', authToken);
+                    result.innerHTML = '<div class="success">✅ Register successful</div>';
+                    log('Register successful, token: ' + authToken.substring(0, 20) + '...');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Register failed: ' + (data.message || 'Unknown error') + '</div>';
+                    log('Register failed: ' + JSON.stringify(data));
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Register error: ' + error.message + '</div>';
+                log('Register error: ' + error.message);
+            }
+        }
+        
+        async function testUpload() {
+            const result = document.getElementById('uploadResult');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!authToken) {
+                result.innerHTML = '<div class="error">❌ Please login first</div>';
+                return;
+            }
+            
+            if (!fileInput.files[0]) {
+                result.innerHTML = '<div class="error">❌ Please select a file</div>';
+                return;
+            }
+            
+            result.innerHTML = '<div class="loading">Uploading file...</div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                const response = await fetch('http://localhost:8000/api/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.data) {
+                    uploadData = data.data;
+                    result.innerHTML = '<div class="success">✅ Upload successful<pre>' + JSON.stringify(data.data, null, 2) + '</pre></div>';
+                    log('Upload successful: ' + data.data.filename);
+                } else {
+                    result.innerHTML = '<div class="error">❌ Upload failed: ' + (data.message || 'Unknown error') + '</div>';
+                    log('Upload failed: ' + JSON.stringify(data));
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Upload error: ' + error.message + '</div>';
+                log('Upload error: ' + error.message);
+            }
+        }
+        
+        async function testAnalysis() {
+            const result = document.getElementById('analysisResult');
+            
+            if (!authToken) {
+                result.innerHTML = '<div class="error">❌ Please login first</div>';
+                return;
+            }
+            
+            if (!uploadData) {
+                result.innerHTML = '<div class="error">❌ Please upload a file first</div>';
+                return;
+            }
+            
+            result.innerHTML = '<div class="loading">Analyzing file...</div>';
+            
+            try {
+                const analysisRequest = {
+                    recordName: 'Debug Test Analysis',
+                    type: 'lab_result',
+                    fileData: uploadData.fileData,
+                    mimeType: uploadData.mimeType,
+                    r2Key: uploadData.r2Key,
+                    r2Url: uploadData.r2Url,
+                    originalName: uploadData.originalName,
+                    size: uploadData.size
+                };
+                
+                log('Analysis request: ' + JSON.stringify(analysisRequest, null, 2));
+                
+                const response = await fetch('http://localhost:8000/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + authToken
+                    },
+                    body: JSON.stringify(analysisRequest)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = '<div class="success">✅ Analysis successful<pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+                    log('Analysis successful');
+                } else {
+                    result.innerHTML = '<div class="error">❌ Analysis failed: ' + (data.message || 'Unknown error') + '<pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+                    log('Analysis failed: ' + JSON.stringify(data));
+                }
+            } catch (error) {
+                result.innerHTML = '<div class="error">❌ Analysis error: ' + error.message + '</div>';
+                log('Analysis error: ' + error.message);
+            }
+        }
+        
+        // Load saved token on page load
+        if (authToken) {
+            log('Loaded saved auth token: ' + authToken.substring(0, 20) + '...');
+        }
+        
+        // Test connection on page load
+        testConnection();
+    </script>
+</body>
+</html>
