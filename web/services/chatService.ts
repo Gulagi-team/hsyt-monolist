@@ -34,6 +34,10 @@ interface ListMessagesResponse {
   };
 }
 
+interface CreateSessionResponse {
+  session: ChatSessionSummary;
+}
+
 interface SendMessageRequest {
   question: string;
   sessionId?: number | null;
@@ -53,6 +57,27 @@ interface SendMessageResponse {
 }
 
 const chatService = {
+  async createSession(title?: string): Promise<CreateSessionResponse> {
+    const body: Record<string, unknown> = {};
+    if (title && title.trim() !== '') {
+      body.title = title.trim();
+    }
+
+    const response = await fetch(`${API_BASE_URL}/chat/sessions`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: Object.keys(body).length > 0 ? JSON.stringify(body) : undefined,
+    });
+
+    const payload = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payload.message || payload.error || 'Không thể tạo phiên chat mới');
+    }
+
+    return payload.data as CreateSessionResponse;
+  },
+
   async listSessions(limit = 50, offset = 0): Promise<ListSessionsResponse> {
     const response = await fetch(`${API_BASE_URL}/chat/sessions?limit=${limit}&offset=${offset}`, {
       method: 'GET',
@@ -107,4 +132,5 @@ const chatService = {
 };
 
 export type { ListSessionsResponse, ListMessagesResponse, SendMessageResponse };
+export type { CreateSessionResponse };
 export { chatService };

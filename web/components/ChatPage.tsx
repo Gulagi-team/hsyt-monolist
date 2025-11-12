@@ -97,6 +97,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
     const [messages, setMessages] = useState<ChatMessageItem[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isCreatingSession, setIsCreatingSession] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState('');
     const [isRecording, setIsRecording] = useState(false);
     const recognitionRef = useRef<any>(null);
@@ -200,6 +201,23 @@ const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
         recognitionRef.current?.stop();
     };
 
+    const handleStartNewSession = async () => {
+        if (isCreatingSession || isLoading) return;
+
+        try {
+            setIsCreatingSession(true);
+            const { session } = await chatService.createSession();
+            setSessions((prev) => [session, ...prev.filter((item) => item.id !== session.id)]);
+            setSelectedSessionId(session.id);
+            setMessages([]);
+            setInput('');
+        } catch (error) {
+            console.error('Không thể tạo phiên chat mới:', error);
+        } finally {
+            setIsCreatingSession(false);
+        }
+    };
+
     const sendMessage = async (message: string) => {
         if (message.trim() === '' || isLoading) return;
 
@@ -262,27 +280,37 @@ const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
         <div className="flex flex-col md:flex-row max-w-6xl mx-auto px-4 py-6 gap-6 w-full min-h-[calc(100vh-120px)]">
             {/* Sessions list */}
             <aside className="md:w-64 border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/80 dark:bg-gray-900/70 backdrop-blur p-4 max-h-[70vh] md:max-h-none overflow-y-auto">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between gap-2 mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Phiên trò chuyện</h3>
-                    <button
-                        onClick={async () => {
-                            try {
-                                const response = await chatService.listSessions(50, 0);
-                                setSessions(response.sessions);
-                                if (response.sessions.length > 0) {
-                                    setSelectedSessionId(response.sessions[0].id);
-                                } else {
-                                    setSelectedSessionId(null);
-                                    setMessages([]);
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleStartNewSession}
+                            disabled={isCreatingSession || isLoading}
+                            className="text-sm px-3 py-1 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-900/30"
+                        >
+                            {isCreatingSession ? 'Đang tạo...' : 'Chat mới'}
+                        </button>
+                        <button
+                            onClick={async () => {
+                                try {
+                                    const response = await chatService.listSessions(50, 0);
+                                    setSessions(response.sessions);
+                                    if (response.sessions.length > 0) {
+                                        setSelectedSessionId(response.sessions[0].id);
+                                    } else {
+                                        setSelectedSessionId(null);
+                                        setMessages([]);
+                                    }
+                                } catch (error) {
+                                    console.error('Không thể tải danh sách phiên chat:', error);
                                 }
-                            } catch (error) {
-                                console.error('Không thể tải danh sách phiên chat:', error);
-                            }
-                        }}
-                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                    >
-                        Làm mới
-                    </button>
+                            }}
+                            disabled={isLoading || isCreatingSession}
+                            className="text-sm text-blue-600 hover:text-blue-700 disabled:opacity-60 disabled:cursor-not-allowed dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                            Làm mới
+                        </button>
+                    </div>
                 </div>
 
                 <div className="space-y-2">

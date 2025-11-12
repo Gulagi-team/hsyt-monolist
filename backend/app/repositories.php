@@ -76,6 +76,18 @@ return function (ContainerBuilder $containerBuilder) {
             );
         },
 
+        \App\Application\Actions\Chat\CreateChatSessionAction::class => function (ContainerInterface $c) {
+            $logger = $c->get(\Psr\Log\LoggerInterface::class);
+            $chatHistoryRepository = $c->get(ChatHistoryRepository::class);
+            $userRepository = $c->get(UserRepository::class);
+
+            return new \App\Application\Actions\Chat\CreateChatSessionAction(
+                $logger,
+                $chatHistoryRepository,
+                $userRepository
+            );
+        },
+
         // MedicalRecord Actions
         CreatePublicShareAction::class => function (ContainerInterface $c) {
             $logger = $c->get(\Psr\Log\LoggerInterface::class);
