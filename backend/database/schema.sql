@@ -15,6 +15,7 @@ CREATE TABLE users (
     blood_type VARCHAR(10) DEFAULT 'O+',
     allergies TEXT,
     current_conditions TEXT,
+    points INT NOT NULL DEFAULT 1,
     email_verified BOOLEAN DEFAULT FALSE,
     email_verification_token VARCHAR(255) NULL,
     reset_password_token VARCHAR(255) NULL,

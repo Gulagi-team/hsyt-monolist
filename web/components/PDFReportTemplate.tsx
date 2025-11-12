@@ -124,28 +124,7 @@ const PDFReportTemplate: React.FC<PDFReportTemplateProps> = ({
           marginBottom: '30px',
           border: '1px solid #e2e8f0'
         }}>
-          <h2 style={{ 
-            fontSize: '18px', 
-            fontWeight: '600', 
-            color: '#1e40af', 
-            margin: '0 0 15px 0' 
-          }}>
-            Thông tin Bệnh nhân
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-            <div>
-              <strong>Họ và tên:</strong> {userProfile.name}
-            </div>
-            <div>
-              <strong>Tuổi:</strong> {userProfile.age}
-            </div>
-            <div>
-              <strong>Nhóm máu:</strong> {userProfile.bloodType}
-            </div>
-            <div>
-              <strong>Dị ứng:</strong> {userProfile.allergies}
-            </div>
-          </div>
+          
           {userProfile.currentConditions && (
             <div style={{ marginTop: '15px' }}>
               <strong>Tình trạng hiện tại:</strong> {userProfile.currentConditions}

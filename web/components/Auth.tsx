@@ -6,7 +6,8 @@ import {
   ChatBubbleLeftRightIcon,
   PillIcon,
   ClipboardDocumentListIcon,
-  CheckIcon
+  CheckIcon,
+  GlobeAltIcon
 } from './icons/Icons';
 import Logo from './Logo';
 import AuthService, { authService, type LoginRequest } from '../services/authService';
@@ -169,11 +170,20 @@ const Auth: React.FC<AuthProps> = ({ onLogin }) => {
         <div className="flex flex-col justify-center w-full px-6 py-10 bg-white shadow-none lg:px-16 dark:bg-gray-900 lg:w-1/2">
           <div className="mx-auto w-full max-w-md">
             <div className="mb-8 text-center lg:text-left">
-              <div className="flex justify-center mb-6 lg:justify-start">
+              {/* <div className="flex flex-col items-center justify-center gap-3 mb-6 lg:flex-row lg:justify-between">
                 <Logo size="md" variant="full" />
-              </div>
+                <a
+                  href="http://tintuc.hsyt.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-2 text-sm font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                >
+                  <GlobeAltIcon className="w-5 h-5" />
+                  <span>Tin tức HSYT</span>
+                </a>
+              </div> */}
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-                Chào mừng trở lại 👋
+                Chào mừng
               </h1>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 Đăng nhập để quản lý hồ sơ y tế và nhận phân tích cá nhân hóa từ AI.

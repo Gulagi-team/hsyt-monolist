@@ -181,14 +181,14 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ record, onBack, userPro
                     </div>
                 )}
                 
-                <button
+                {/* <button
                     onClick={handleQuickPDFExport}
                     disabled={isGeneratingPDF}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-md transition-colors text-sm font-medium"
                 >
                     <DocumentArrowDownIcon className="w-4 h-4" />
                     <span>{isGeneratingPDF ? 'Đang tạo...' : 'Xuất PDF'}</span>
-                </button>
+                </button> */}
                 
                 {hasStructuredData(record) && (
                     <button
@@ -197,18 +197,18 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({ record, onBack, userPro
                         className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white rounded-md transition-colors text-sm font-medium"
                     >
                         <DocumentArrowDownIcon className="w-4 h-4" />
-                        <span>{isGeneratingPDF ? 'Đang tạo...' : 'PDF Có cấu trúc'}</span>
+                        <span>{isGeneratingPDF ? 'Đang tạo...' : 'PDF'}</span>
                     </button>
                 )}
                 
-                <button
+                {/* <button
                     onClick={handleComprehensivePDFExport}
                     disabled={isGeneratingPDF}
                     className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-md transition-colors text-sm font-medium"
                 >
-                    {/* <PrinterIcon className="w-4 h-4" /> */}
+
                     <span>{isGeneratingPDF ? 'Đang tạo...' : 'Báo cáo Có Gợi ý'}</span>
-                </button>
+                </button> */}
             </div>
         </div>
 

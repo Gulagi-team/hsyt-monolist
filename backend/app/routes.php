@@ -17,6 +17,8 @@ use App\Application\Actions\MedicalRecord\DisablePublicShareAction;
 use App\Application\Actions\Analysis\AnalyzeAction;
 use App\Application\Actions\Upload\UploadAction;
 use App\Application\Actions\Chat\MedicalChatAction;
+use App\Application\Actions\Chat\ListChatSessionsAction;
+use App\Application\Actions\Chat\GetChatSessionMessagesAction;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
@@ -65,6 +67,8 @@ return function (App $app) {
         
         // Medical chat route
         $group->post('/chat/medical', MedicalChatAction::class);
+        $group->get('/chat/sessions', ListChatSessionsAction::class);
+        $group->get('/chat/sessions/{sessionId}/messages', GetChatSessionMessagesAction::class);
     });
 
     // Public routes (no authentication required)

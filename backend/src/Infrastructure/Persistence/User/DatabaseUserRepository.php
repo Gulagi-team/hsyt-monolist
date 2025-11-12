@@ -89,11 +89,11 @@ class DatabaseUserRepository implements UserRepository
 
     public function createUser(User $user): User
     {
-        $query = 'INSERT INTO users (name, email, password_hash, age, blood_type, allergies, current_conditions, 
-                  email_verified, email_verification_token, reset_password_token, reset_password_expires, 
-                  created_at, updated_at) 
-                  VALUES (:name, :email, :password_hash, :age, :blood_type, :allergies, :current_conditions, 
-                  :email_verified, :email_verification_token, :reset_password_token, :reset_password_expires, 
+        $query = 'INSERT INTO users (name, email, password_hash, age, blood_type, allergies, current_conditions, points,
+                  email_verified, email_verification_token, reset_password_token, reset_password_expires,
+                  created_at, updated_at)
+                  VALUES (:name, :email, :password_hash, :age, :blood_type, :allergies, :current_conditions, :points,
+                  :email_verified, :email_verification_token, :reset_password_token, :reset_password_expires,
                   :created_at, :updated_at)';
         
         $statement = $this->connection->prepare($query);
@@ -105,6 +105,7 @@ class DatabaseUserRepository implements UserRepository
             'blood_type' => $user->getBloodType(),
             'allergies' => $user->getAllergies(),
             'current_conditions' => $user->getCurrentConditions(),
+            'points' => $user->getPoints(),
             'email_verified' => $user->isEmailVerified() ? 1 : 0,
             'email_verification_token' => $user->getEmailVerificationToken(),
             'reset_password_token' => $user->getResetPasswordToken(),
@@ -124,6 +125,7 @@ class DatabaseUserRepository implements UserRepository
             $user->getBloodType(),
             $user->getAllergies(),
             $user->getCurrentConditions(),
+            $user->getPoints(),
             $user->isEmailVerified(),
             $user->getEmailVerificationToken(),
             $user->getResetPasswordToken(),
@@ -135,12 +137,12 @@ class DatabaseUserRepository implements UserRepository
 
     public function updateUser(User $user): User
     {
-        $query = 'UPDATE users SET name = :name, email = :email, password_hash = :password_hash, 
-                  age = :age, blood_type = :blood_type, allergies = :allergies, 
-                  current_conditions = :current_conditions, email_verified = :email_verified, 
-                  email_verification_token = :email_verification_token, 
-                  reset_password_token = :reset_password_token, 
-                  reset_password_expires = :reset_password_expires, 
+        $query = 'UPDATE users SET name = :name, email = :email, password_hash = :password_hash,
+                  age = :age, blood_type = :blood_type, allergies = :allergies,
+                  current_conditions = :current_conditions, points = :points, email_verified = :email_verified,
+                  email_verification_token = :email_verification_token,
+                  reset_password_token = :reset_password_token,
+                  reset_password_expires = :reset_password_expires,
                   updated_at = :updated_at WHERE id = :id';
         
         $statement = $this->connection->prepare($query);
@@ -153,6 +155,7 @@ class DatabaseUserRepository implements UserRepository
             'blood_type' => $user->getBloodType(),
             'allergies' => $user->getAllergies(),
             'current_conditions' => $user->getCurrentConditions(),
+            'points' => $user->getPoints(),
             'email_verified' => $user->isEmailVerified() ? 1 : 0,
             'email_verification_token' => $user->getEmailVerificationToken(),
             'reset_password_token' => $user->getResetPasswordToken(),
@@ -183,6 +186,7 @@ class DatabaseUserRepository implements UserRepository
             $row['blood_type'],
             $row['allergies'] ?? null,
             $row['current_conditions'] ?? null,
+            isset($row['points']) ? (int) $row['points'] : 0,
             (bool) $row['email_verified'],
             $row['email_verification_token'],
             $row['reset_password_token'],

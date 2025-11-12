@@ -19,8 +19,12 @@ class CreatePublicShareAction extends MedicalRecordAction
 
         // Validate record ownership
         $record = $this->medicalRecordRepository->findRecordById($recordId);
-        if (!$record || $record['user_id'] !== $userId) {
-            return $this->respondWithData(['error' => 'Record not found or access denied'], 404);
+        if (!$record) {
+            return $this->respondWithData(['error' => 'Record not found'], 404);
+        }
+
+        if ($record->getUserId() !== $userId) {
+            return $this->respondWithData(['error' => 'Access denied'], 403);
         }
 
         // Generate unique share token
@@ -55,8 +59,12 @@ class CreatePublicShareAction extends MedicalRecordAction
                 'shareToken' => $shareToken,
                 'shareUrl' => $this->getShareUrl($shareToken),
                 'hasPassword' => !empty($passwordHash),
-                'expiresAt' => $expiresAt
-            ]);
+                'expiresAt' => $expiresAt,
+                'record' => [
+                    'id' => $record->getId(),
+                    'name' => $record->getRecordName(),
+                ],
+            ], 201);
         } catch (Exception $e) {
             return $this->respondWithData(['error' => 'Failed to create public share'], 500);
         }
@@ -65,7 +73,8 @@ class CreatePublicShareAction extends MedicalRecordAction
     private function generateUniqueToken(): string
     {
         do {
-            $token = bin2hex(random_bytes(32));
+            $raw = random_bytes(16);
+            $token = rtrim(strtr(base64_encode($raw), '+/', '-_'), '=');
         } while ($this->medicalRecordRepository->shareTokenExists($token));
 
         return $token;

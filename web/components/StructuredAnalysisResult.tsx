@@ -22,10 +22,8 @@ interface StructuredAnalysisResultProps {
 }
 
 const StructuredAnalysisResult: React.FC<StructuredAnalysisResultProps> = ({ record, userProfile }) => {
-  // Default expanded sections for better user experience
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['patient-info', 'results', 'medications', 'interpretation', 'treatment-analysis'])
-  );
+  // Track collapsed sections; empty set means all sections open by default
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
   // Parse structured report from analysis
   let structuredReport: ProfessionalMedicalReport | null = null;
@@ -39,13 +37,13 @@ const StructuredAnalysisResult: React.FC<StructuredAnalysisResultProps> = ({ rec
   }
 
   const toggleSection = (sectionId: string) => {
-    const newExpanded = new Set(expandedSections);
-    if (newExpanded.has(sectionId)) {
-      newExpanded.delete(sectionId);
+    const updated = new Set(collapsedSections);
+    if (updated.has(sectionId)) {
+      updated.delete(sectionId);
     } else {
-      newExpanded.add(sectionId);
+      updated.add(sectionId);
     }
-    setExpandedSections(newExpanded);
+    setCollapsedSections(updated);
   };
 
   const CollapsibleSection: React.FC<{
@@ -54,7 +52,7 @@ const StructuredAnalysisResult: React.FC<StructuredAnalysisResultProps> = ({ rec
     children: React.ReactNode;
     defaultExpanded?: boolean;
   }> = ({ id, title, children, defaultExpanded = false }) => {
-    const isExpanded = expandedSections.has(id);
+    const isExpanded = !collapsedSections.has(id);
     
     return (
       <div className="border border-gray-200 dark:border-gray-700 rounded-lg mb-4">

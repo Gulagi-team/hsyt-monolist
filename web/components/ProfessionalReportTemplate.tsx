@@ -31,19 +31,7 @@ const ProfessionalReportTemplate: React.FC<ProfessionalReportTemplateProps> = ({
       </div>
 
       {/* Patient Information */}
-      {(labReport.patientInfo.name || labReport.patientInfo.age) && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-300 pb-2">
-            THÔNG TIN BỆNH NHÂN
-          </h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            {labReport.patientInfo.name && <div><strong>Họ tên:</strong> {labReport.patientInfo.name}</div>}
-            {labReport.patientInfo.age && <div><strong>Tuổi:</strong> {labReport.patientInfo.age}</div>}
-            {labReport.patientInfo.gender && <div><strong>Giới tính:</strong> {labReport.patientInfo.gender}</div>}
-            {labReport.patientInfo.patientId && <div><strong>Mã BN:</strong> {labReport.patientInfo.patientId}</div>}
-          </div>
-        </div>
-      )}
+      
 
       {/* Test Results Table */}
       <div className="mb-6">
@@ -213,20 +201,7 @@ const ProfessionalReportTemplate: React.FC<ProfessionalReportTemplateProps> = ({
         </div>
       </div>
 
-      {/* Patient Information */}
-      {(prescriptionReport.patientInfo.name || prescriptionReport.patientInfo.age) && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-300 pb-2">
-            THÔNG TIN BỆNH NHÂN
-          </h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            {prescriptionReport.patientInfo.name && <div><strong>Họ tên:</strong> {prescriptionReport.patientInfo.name}</div>}
-            {prescriptionReport.patientInfo.age && <div><strong>Tuổi:</strong> {prescriptionReport.patientInfo.age}</div>}
-            {prescriptionReport.patientInfo.gender && <div><strong>Giới tính:</strong> {prescriptionReport.patientInfo.gender}</div>}
-            {prescriptionReport.patientInfo.patientId && <div><strong>Mã BN:</strong> {prescriptionReport.patientInfo.patientId}</div>}
-          </div>
-        </div>
-      )}
+     
 
       {/* Medications */}
       <div className="mb-6">

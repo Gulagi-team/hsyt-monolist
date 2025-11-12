@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeftIcon, LockClosedIcon,  DocumentTextIcon, PillIcon } from './icons/Icons';
+
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api';
 import StructuredAnalysisResult from './StructuredAnalysisResult';
 
 interface PublicRecordViewerProps {
@@ -21,8 +23,9 @@ const PublicRecordViewer: React.FC<PublicRecordViewerProps> = ({ shareToken, onB
   }, [shareToken]);
 
   const loadSharedRecord = async (providedPassword?: string) => {
+    setLoading(true);
     try {
-      const response = await fetch(`/api/public/share/${shareToken}`, {
+      const response = await fetch(`${API_BASE_URL}/public/share/${shareToken}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,20 +35,21 @@ const PublicRecordViewer: React.FC<PublicRecordViewerProps> = ({ shareToken, onB
         })
       });
 
-      const data = await response.json();
+      const payload = await response.json();
+      const responseData = payload?.data ?? payload;
 
       if (!response.ok) {
-        if (data.requiresPassword) {
+        if (responseData?.requiresPassword) {
           setRequiresPassword(true);
           setError(null);
         } else {
-          setError(data.error || 'Không thể tải hồ sơ được chia sẻ');
+          setError(responseData?.error || 'Không thể tải hồ sơ được chia sẻ');
         }
         return;
       }
 
-      setRecord(data.record);
-      setShareInfo(data.shareInfo);
+      setRecord(responseData?.record ?? null);
+      setShareInfo(responseData?.shareInfo ?? null);
       setRequiresPassword(false);
       setError(null);
     } catch (err) {
@@ -175,25 +179,37 @@ const PublicRecordViewer: React.FC<PublicRecordViewerProps> = ({ shareToken, onB
                 </button>
               )}
               <div className="flex items-center space-x-2">
-                {record.type === 'lab_result' ? (
-                  <DocumentTextIcon className="w-6 h-6 text-blue-500" />
-                ) : (
-                  <PillIcon className="w-6 h-6 text-green-500" />
-                )}
-                <div>
-                  <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {record.recordName}
-                  </h1>
-                  <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-                    <span>Được chia sẻ công khai</span>
-                    {shareInfo && (
-                      <span className="flex items-center space-x-1">
-
-                        <span>{shareInfo.viewCount} lượt xem</span>
-                      </span>
+                {record ? (
+                  <>
+                    {record.type === 'lab_result' ? (
+                      <DocumentTextIcon className="w-6 h-6 text-blue-500" />
+                    ) : (
+                      <PillIcon className="w-6 h-6 text-green-500" />
                     )}
+                    <div>
+                      <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {record.recordName}
+                      </h1>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span>Được chia sẻ công khai</span>
+                        {shareInfo && (
+                          <span className="flex items-center space-x-1">
+                            <span>{shareInfo.viewCount} lượt xem</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Hồ sơ y tế
+                    </h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Đang tải dữ liệu hồ sơ chia sẻ...
+                    </p>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -205,6 +221,45 @@ const PublicRecordViewer: React.FC<PublicRecordViewerProps> = ({ shareToken, onB
         {record ? (
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
             <div className="xl:col-span-3">
+              {(record.r2Url || record.fileUrl) && (
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 mb-6">
+                  <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">Hình ảnh tài liệu</h3>
+                  <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+                    {(() => {
+                      const previewUrl = record.r2Url || record.fileUrl;
+                      const isImage = typeof previewUrl === 'string' && /\.(png|jpe?g|gif|webp|bmp)$/i.test(previewUrl.split('?')[0]);
+
+                      if (previewUrl && isImage) {
+                        return (
+                          <img
+                            src={previewUrl}
+                            alt={record.recordName || 'Tài liệu y tế'}
+                            className="w-full h-auto max-h-[600px] object-contain bg-white"
+                          />
+                        );
+                      }
+
+                      if (previewUrl) {
+                        return (
+                          <div className="p-6 text-center text-sm text-gray-600 dark:text-gray-300">
+                            <p>Tài liệu không ở định dạng ảnh. Bạn có thể tải và xem trực tiếp:</p>
+                            <a
+                              href={previewUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-4 py-2 mt-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow transition-colors"
+                            >
+                              Mở tài liệu
+                            </a>
+                          </div>
+                        );
+                      }
+
+                      return null;
+                    })()}
+                  </div>
+                </div>
+              )}
               <StructuredAnalysisResult
                 record={record}
                 userProfile={null}

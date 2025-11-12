@@ -59,24 +59,38 @@ class ViewPublicRecordAction extends MedicalRecordAction
             $this->medicalRecordRepository->incrementShareViewCount($share['id']);
 
             // Return record data (without sensitive information)
+            $recordData = [
+                'id' => $record->getId(),
+                'recordName' => $record->getRecordName(),
+                'type' => $record->getType(),
+                'fileUrl' => $record->getFileUrl(),
+                'r2Url' => $record->getR2Url(),
+                'analysis' => $record->getAnalysis(),
+                'createdAt' => $record->getCreatedAt(),
+                'updatedAt' => $record->getUpdatedAt(),
+                'documentType' => $record->getDocumentType(),
+                'aiSummary' => $record->getAiSummary(),
+                'keyFindings' => $record->getKeyFindings(),
+                'structuredData' => $record->getStructuredData(),
+                'classificationConfidence' => $record->getClassificationConfidence(),
+                'patientContext' => $record->getPatientContext(),
+                'testDate' => $record->getTestDate(),
+                'doctorName' => $record->getDoctorName(),
+                'clinicName' => $record->getClinicName(),
+                'diagnosis' => $record->getDiagnosis(),
+                'medications' => $record->getMedications(),
+                'testResults' => $record->getTestResults(),
+                'abnormalValues' => $record->getAbnormalValues(),
+                'recommendations' => $record->getRecommendations(),
+            ];
+
             return $this->respondWithData([
-                'record' => [
-                    'id' => $record['id'],
-                    'recordName' => $record['record_name'],
-                    'type' => $record['type'],
-                    'fileUrl' => $record['file_url'],
-                    'r2Url' => $record['r2_url'],
-                    'analysis' => $record['analysis'],
-                    'createdAt' => $record['created_at'],
-                    'documentType' => $record['document_type'],
-                    'aiSummary' => $record['ai_summary'],
-                    'keyFindings' => $record['key_findings']
-                ],
+                'record' => $recordData,
                 'shareInfo' => [
                     'viewCount' => $share['view_count'] + 1,
                     'createdAt' => $share['created_at'],
-                    'expiresAt' => $share['expires_at']
-                ]
+                    'expiresAt' => $share['expires_at'],
+                ],
             ]);
 
         } catch (Exception $e) {

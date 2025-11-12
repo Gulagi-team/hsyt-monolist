@@ -32,11 +32,19 @@ class UpdateUserAction extends UserAction
         $updatedUser = new User(
             $userId,
             $formData['name'],
+            $existingUser->getEmail(),
+            $existingUser->getPasswordHash(),
             (int) $formData['age'],
             $formData['bloodType'],
             $formData['allergies'],
             $formData['currentConditions'],
-            $existingUser->getCreatedAt()
+            $existingUser->getPoints(),
+            $existingUser->isEmailVerified(),
+            $existingUser->getEmailVerificationToken(),
+            $existingUser->getResetPasswordToken(),
+            $existingUser->getResetPasswordExpires(),
+            $existingUser->getCreatedAt(),
+            date('Y-m-d H:i:s')
         );
 
         $user = $this->userRepository->updateUser($updatedUser);

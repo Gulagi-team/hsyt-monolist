@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ShareIcon, LockClosedIcon, GlobeAltIcon, XMarkIcon, CheckIcon } from './icons/Icons';
 
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
 interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,11 +29,11 @@ const ShareModal: React.FC<ShareModalProps> = ({
     try {
       const expiresAt = expiresIn ? new Date(Date.now() + parseInt(expiresIn) * 24 * 60 * 60 * 1000).toISOString() : null;
 
-      const response = await fetch(`/api/medical-records/${recordId}/share`, {
+      const response = await fetch(`${API_BASE_URL}/medical-records/${recordId}/share`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify({
           password: shareMode === 'password' ? password : null,
@@ -39,16 +41,25 @@ const ShareModal: React.FC<ShareModalProps> = ({
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to create share');
+      const payload = await response.json();
+
+      if (!response.ok || payload.error) {
+        const errorMessage = payload?.error?.description ?? payload?.data?.error ?? 'Failed to create share';
+        throw new Error(errorMessage);
       }
 
-      const shareData = await response.json();
+      const shareData = payload?.data ?? payload;
+
+      if (!shareData?.shareUrl) {
+        throw new Error('Phản hồi không hợp lệ từ máy chủ');
+      }
+
       setCreatedShare(shareData);
       onShareCreated(shareData);
     } catch (error) {
       console.error('Error creating share:', error);
-      alert('Không thể tạo liên kết chia sẻ. Vui lòng thử lại.');
+      const message = error instanceof Error ? error.message : 'Không thể tạo liên kết chia sẻ. Vui lòng thử lại.';
+      alert(message);
     } finally {
       setIsCreating(false);
     }

@@ -118,11 +118,7 @@ export async function generateComprehensiveMedicalPDF(
     const currentDate = new Date().toLocaleDateString('vi-VN');
     pdf.text(`Ngày tạo: ${currentDate}`, margin, margin + 25);
     
-    if (userProfile) {
-      pdf.text(`Bệnh nhân: ${userProfile.name}`, margin, margin + 35);
-      pdf.text(`Tuổi: ${userProfile.age}`, margin, margin + 45);
-      pdf.text(`Nhóm máu: ${userProfile.bloodType}`, margin, margin + 55);
-    }
+   
 
     // Add record information
     pdf.setFont('helvetica', 'bold');

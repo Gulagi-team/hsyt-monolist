@@ -186,7 +186,7 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
         </div>
         
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden animate-pulse">
                 <div className="h-64 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800"></div>
@@ -199,12 +199,12 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
             {records.map((record) => (
-            <div key={record.id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden flex flex-col hover:shadow-xl transition-shadow duration-300">
-                {/* Large Image Preview at Top */}
+            <div key={record.id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden flex flex-row lg:flex-col hover:shadow-xl transition-shadow duration-300">
+                {/* Preview Section */}
                 {(record.fileUrl || record.r2Url) ? (
-                    <div className="relative w-full h-64 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden group border border-gray-200 dark:border-gray-600">
+                    <div className="relative w-28 sm:w-36 lg:w-full h-28 sm:h-36 lg:h-64 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden group border border-gray-200 dark:border-gray-600 flex-shrink-0">
                         <img
                             src={record.r2Url || record.fileUrl}
                             alt={`Preview of ${record.recordName}`}
@@ -270,7 +270,7 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
                         <div className="absolute top-0 right-0 w-3 h-3 bg-gradient-to-bl from-gray-300 to-gray-400 dark:from-gray-600 dark:to-gray-700 rounded-bl-md shadow-sm"></div>
                     </div>
                 ) : (
-                    <div className="relative w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                    <div className="relative w-28 sm:w-36 lg:w-full h-28 sm:h-36 lg:h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center flex-shrink-0">
                         <div className="text-center">
                             {record.type === 'lab_result' ? (
                                 <DocumentTextIcon className="h-16 w-16 mx-auto text-blue-400 mb-3" />
@@ -299,40 +299,12 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
                 )}
 
                 {/* Content Section */}
-                <div className="p-5 flex-grow">
-                    <div className="mb-3">
-                        <h4 
-                            className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight" 
-                            title={record.recordName}
-                            style={{
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden'
-                            }}
-                        >
-                            {record.recordName}
-                        </h4>
-                        <div className="flex items-center justify-between mt-2">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {formatDateTime(record.createdAt)}
-                            </p>
-                            {record.r2Url && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                    <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Đã lưu
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* AI Summary Preview */}
-                    {record.aiSummary && (
-                        <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <p 
-                                className="text-sm text-blue-800 dark:text-blue-200"
+                <div className="flex flex-col flex-grow">
+                    <div className="p-4 sm:p-5 flex-grow">
+                        <div className="mb-3">
+                            <h4 
+                                className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight" 
+                                title={record.recordName}
                                 style={{
                                     display: '-webkit-box',
                                     WebkitLineClamp: 2,
@@ -340,70 +312,101 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
                                     overflow: 'hidden'
                                 }}
                             >
-                                💡 {record.aiSummary}
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Key Findings */}
-                    {record.keyFindings && record.keyFindings.length > 0 && (
-                        <div className="mb-3">
-                            <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Phát hiện chính:</p>
-                            <div className="flex flex-wrap gap-1">
-                                {record.keyFindings.slice(0, 3).map((finding, index) => (
-                                    <span key={index} className="inline-block px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-xs rounded-md">
-                                        {finding}
-                                    </span>
-                                ))}
-                                {record.keyFindings.length > 3 && (
-                                    <span className="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-md">
-                                        +{record.keyFindings.length - 3} khác
+                                {record.recordName}
+                            </h4>
+                            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+                                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                                    {formatDateTime(record.createdAt)}
+                                </p>
+                                {record.r2Url && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] sm:text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                        <svg className="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Đã lưu
                                     </span>
                                 )}
                             </div>
                         </div>
-                    )}
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-700/50 px-5 py-3 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                        <button
-                            onClick={() => onSelectRecord(record.id)}
-                            className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
-                        >
-                            Xem chi tiết
-                        </button>
-                        {record.r2Url && (
-                            <a
-                                href={record.r2Url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-sm font-medium text-green-600 dark:text-green-400 hover:underline"
-                                title="Xem file gốc"
-                            >
-                                📄 File gốc
-                            </a>
+
+                        {/* AI Summary Preview */}
+                        {record.aiSummary && (
+                            <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <p 
+                                    className="text-sm text-blue-800 dark:text-blue-200"
+                                    style={{
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 2,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    💡 {record.aiSummary}
+                                </p>
+                            </div>
                         )}
+
+                        {/* Key Findings */}
+                        {record.keyFindings && record.keyFindings.length > 0 && (
+                            <div className="mb-3">
+                                <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Phát hiện chính:</p>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {record.keyFindings.slice(0, 3).map((finding, index) => (
+                                        <span key={index} className="inline-block px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-[11px] sm:text-xs rounded-md">
+                                            {finding}
+                                        </span>
+                                    ))}
+                                    {record.keyFindings.length > 3 && (
+                                        <span className="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-[11px] sm:text-xs rounded-md">
+                                            +{record.keyFindings.length - 3} khác
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="bg-gray-50 dark:bg-gray-700/50 px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center space-x-3">
+                            <button
+                                onClick={() => onSelectRecord(record.id)}
+                                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                                Xem chi tiết
+                            </button>
+                            {record.r2Url && (
+                                <a
+                                    href={record.r2Url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-medium text-green-600 dark:text-green-400 hover:underline"
+                                    title="Xem file gốc"
+                                >
+                                    📄 File gốc
+                                </a>
+                            )}
+                            <button
+                                onClick={(e) => handleShare(record.id, record.recordName, e)}
+                                className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline flex items-center space-x-1"
+                                title="Chia sẻ hồ sơ"
+                            >
+                                <ShareIcon className="w-4 h-4" />
+                                <span>Chia sẻ</span>
+                            </button>
+                        </div>
                         <button
-                            onClick={(e) => handleShare(record.id, record.recordName, e)}
-                            className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:underline flex items-center space-x-1"
-                            title="Chia sẻ hồ sơ"
+                          onClick={(e) => handleDelete(record.id, e)}
+                          disabled={deletingRecordId === record.id}
+                          className="p-1 text-red-500 hover:text-red-700 disabled:opacity-50 transition-colors"
+                          title="Xóa hồ sơ"
                         >
-                            <ShareIcon className="w-4 h-4" />
-                            <span>Chia sẻ</span>
+                          {deletingRecordId === record.id ? (
+                            <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            <XMarkIcon className="w-4 h-4" />
+                          )}
                         </button>
                     </div>
-                    <button
-                      onClick={(e) => handleDelete(record.id, e)}
-                      disabled={deletingRecordId === record.id}
-                      className="p-1 text-red-500 hover:text-red-700 disabled:opacity-50 transition-colors"
-                      title="Xóa hồ sơ"
-                    >
-                      {deletingRecordId === record.id ? (
-                        <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
-                      ) : (
-                        <XMarkIcon className="w-4 h-4" />
-                      )}
-                    </button>
                 </div>
             </div>
             ))}

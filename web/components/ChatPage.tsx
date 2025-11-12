@@ -1,18 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getChatResponse } from '../services/geminiService';
+import { chatService } from '../services/chatService';
 import ChatLoadingPopup from './ChatLoadingPopup';
 import SuggestedQuestions from './SuggestedQuestions';
-import type { MedicalRecord, UserProfile } from '../types';
+import type { MedicalRecord, UserProfile, ChatMessageItem, ChatSessionSummary } from '../types';
 import { MicrophoneIcon } from './icons/Icons';
 
 interface ChatPageProps {
   records: MedicalRecord[];
   profile: UserProfile;
-}
-
-interface Message {
-    sender: 'user' | 'ai';
-    text: string;
 }
 
 // Add type definitions for browser API
@@ -97,20 +92,9 @@ const formatMarkdown = (text: string) => {
 };
 
 const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
-    const [messages, setMessages] = useState<Message[]>([
-        { 
-            sender: 'ai', 
-            text: `👋 Xin chào ${profile.name}! Tôi là Bác sĩ AI của bạn.
-
-🩺 Tôi đã xem qua ${records.length} hồ sơ y tế của bạn và sẵn sàng trả lời các câu hỏi về:
-• Kết quả xét nghiệm và ý nghĩa của các chỉ số
-• Thuốc đang sử dụng và tác dụng phụ
-• Xu hướng sức khỏe theo thời gian
-• Lời khuyên cá nhân hóa dựa trên hồ sơ của bạn
-
-💬 Hãy hỏi tôi bất cứ điều gì về sức khỏe của bạn!` 
-        }
-    ]);
+    const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
+    const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
+    const [messages, setMessages] = useState<ChatMessageItem[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [currentQuestion, setCurrentQuestion] = useState('');
@@ -122,9 +106,46 @@ const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
+    };
 
     useEffect(scrollToBottom, [messages]);
+
+    useEffect(() => {
+        const loadSessions = async () => {
+            try {
+                const response = await chatService.listSessions(50, 0);
+                setSessions(response.sessions);
+
+                if (response.sessions.length > 0) {
+                    const latestSession = response.sessions[0];
+                    setSelectedSessionId(latestSession.id);
+                }
+            } catch (error) {
+                console.error('Không thể tải danh sách phiên chat:', error);
+            }
+        };
+
+        loadSessions();
+    }, []);
+
+    useEffect(() => {
+        const loadMessages = async () => {
+            if (!selectedSessionId) {
+                setMessages([]);
+                return;
+            }
+
+            try {
+                const response = await chatService.getSessionMessages(selectedSessionId, 200, 0);
+                setMessages(response.messages);
+            } catch (error) {
+                console.error('Không thể tải tin nhắn của phiên chat:', error);
+                setMessages([]);
+            }
+        };
+
+        loadMessages();
+    }, [selectedSessionId]);
 
     useEffect(() => {
         if (!SpeechRecognitionApi) {
@@ -181,22 +202,48 @@ const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
 
     const sendMessage = async (message: string) => {
         if (message.trim() === '' || isLoading) return;
-        
+
         if (isRecording) {
             stopRecording();
         }
 
         const userMessage = message.trim();
         setCurrentQuestion(userMessage);
-        setMessages(prev => [...prev, { sender: 'user', text: userMessage }]);
+
+        const optimisticUserMessage: ChatMessageItem = {
+            id: Date.now(),
+            sessionId: selectedSessionId ?? 0,
+            sender: 'user',
+            message: userMessage,
+            createdAt: new Date().toISOString(),
+        };
+
+        setMessages(prev => [...prev, optimisticUserMessage]);
         setIsLoading(true);
 
         try {
-            const response = await getChatResponse(records, profile, userMessage);
-            setMessages(prev => [...prev, { sender: 'ai', text: response }]);
+            const response = await chatService.sendMessage({
+                question: userMessage,
+                sessionId: selectedSessionId ?? undefined,
+            });
+
+            // Update session list with new/updated session
+            const updatedSessions = await chatService.listSessions(50, 0);
+            setSessions(updatedSessions.sessions);
+            setSelectedSessionId(response.sessionId);
+
+            // Reload messages for the session
+            const messageResponse = await chatService.getSessionMessages(response.sessionId, 200, 0);
+            setMessages(messageResponse.messages);
         } catch (error) {
-            console.error('Error getting chat response:', error);
-            const errorMessage = { sender: 'ai' as const, text: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.' };
+            console.error('Không thể gửi tin nhắn:', error);
+            const errorMessage: ChatMessageItem = {
+                id: Date.now() + 1,
+                sessionId: selectedSessionId ?? 0,
+                sender: 'ai',
+                message: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.',
+                createdAt: new Date().toISOString(),
+            };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
             setIsLoading(false);
@@ -212,37 +259,103 @@ const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
     };
 
     return (
-        <div className="h-full flex flex-col max-w-3xl mx-auto px-4 py-6">
-            <header className="mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Trò chuyện với Bác sĩ AI</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Đặt câu hỏi để nhận tư vấn dựa trên hồ sơ y tế của bạn.
-                </p>
-            </header>
+        <div className="flex flex-col md:flex-row max-w-6xl mx-auto px-4 py-6 gap-6 w-full min-h-[calc(100vh-120px)]">
+            {/* Sessions list */}
+            <aside className="md:w-64 border border-gray-200 dark:border-gray-700 rounded-2xl bg-white/80 dark:bg-gray-900/70 backdrop-blur p-4 max-h-[70vh] md:max-h-none overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Phiên trò chuyện</h3>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const response = await chatService.listSessions(50, 0);
+                                setSessions(response.sessions);
+                                if (response.sessions.length > 0) {
+                                    setSelectedSessionId(response.sessions[0].id);
+                                } else {
+                                    setSelectedSessionId(null);
+                                    setMessages([]);
+                                }
+                            } catch (error) {
+                                console.error('Không thể tải danh sách phiên chat:', error);
+                            }
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                        Làm mới
+                    </button>
+                </div>
 
-            <div className="flex flex-col flex-grow rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/70 backdrop-blur">
-                <div className="flex-grow overflow-y-auto px-4 py-4 space-y-4">
-                    {messages.map((msg, index) => (
-                        <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div
-                                className={`max-w-xl rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${msg.sender === 'user'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-white dark:bg-gray-900/80 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100'}`}
+                <div className="space-y-2">
+                    {sessions.length === 0 ? (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Chưa có phiên chat nào. Hãy gửi câu hỏi đầu tiên để bắt đầu.
+                        </p>
+                    ) : (
+                        sessions.map((session) => (
+                            <button
+                                key={session.id}
+                                onClick={() => setSelectedSessionId(session.id)}
+                                className={`w-full text-left p-3 rounded-xl border transition-colors ${
+                                    selectedSessionId === session.id
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200'
+                                        : 'border-gray-200 dark:border-gray-700 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:border-blue-500'
+                                }`}
                             >
-                                {msg.sender === 'ai' ? (
-                                    <div
-                                        className="space-y-3"
-                                        dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.text) }}
-                                    />
-                                ) : (
-                                    <p>{msg.text}</p>
-                                )}
-                            </div>
+                                <h4 className="font-medium text-sm truncate">
+                                    {session.title || 'Cuộc trò chuyện mới'}
+                                </h4>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    Bắt đầu: {new Date(session.startedAt).toLocaleString('vi-VN')}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    Hoạt động gần nhất: {new Date(session.lastActivityAt).toLocaleString('vi-VN')}
+                                </p>
+                            </button>
+                        ))
+                    )}
+                </div>
+            </aside>
+
+            {/* Chat area */}
+            <div className="flex-1 flex flex-col rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/70 backdrop-blur h-[70vh] md:h-[80vh]">
+                <header className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Trò chuyện với Bác sĩ AI</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {selectedSessionId ? 'Đang tiếp tục cuộc trò chuyện.' : 'Bắt đầu một cuộc trò chuyện mới bằng cách đặt câu hỏi.'}
+                    </p>
+                </header>
+
+                <div className="flex-1 overflow-y-auto overscroll-y-contain scroll-smooth touch-pan-y px-4 py-4 space-y-4">
+                    {messages.length === 0 ? (
+                        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                            Chưa có tin nhắn. Hãy gửi câu hỏi để bắt đầu cuộc trò chuyện với bác sĩ AI.
                         </div>
-                    ))}
+                    ) : (
+                        messages.map((msg) => (
+                            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div
+                                    className={`max-w-2xl rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${msg.sender === 'user'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-white dark:bg-gray-900/80 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100'}`}
+                                >
+                                    {msg.sender === 'ai' ? (
+                                        <div
+                                            className="space-y-3"
+                                            dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.message) }}
+                                        />
+                                    ) : (
+                                        <p>{msg.message}</p>
+                                    )}
+                                    <p className="mt-2 text-xs opacity-70">
+                                        {new Date(msg.createdAt).toLocaleString('vi-VN')}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    )}
                     {isLoading && (
                         <div className="flex justify-start">
-                            <div className="max-w-xl rounded-2xl px-4 py-3 text-sm leading-relaxed border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/80 text-gray-500 dark:text-gray-300">
+                            <div className="max-w-2xl rounded-2xl px-4 py-3 text-sm leading-relaxed border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/80 text-gray-500 dark:text-gray-300">
                                 <div className="flex gap-1">
                                     <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
                                     <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse [animation-delay:0.15s]"></span>
@@ -255,8 +368,7 @@ const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
                 </div>
 
                 <div className="border-t border-gray-200 dark:border-gray-800 px-4 py-3 space-y-4">
-                    {/* Suggested Questions - only show when no messages from user yet */}
-                    {messages.length === 1 && (
+                    {!selectedSessionId && messages.length === 0 && (
                         <SuggestedQuestions
                             records={records}
                             onQuestionSelect={(question) => {
@@ -276,7 +388,12 @@ const ChatPage: React.FC<ChatPageProps> = ({ records, profile }) => {
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleSend();
+                                }
+                            }}
                             placeholder={isRecording ? "Đang lắng nghe..." : "Nhập câu hỏi của bạn..."}
                             className="flex-grow rounded-full border border-gray-300 dark:border-gray-700 bg-transparent px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-70"
                             disabled={isLoading}

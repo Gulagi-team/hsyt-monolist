@@ -15,6 +15,9 @@ const App: React.FC = () => {
   const [isLoadingRecords, setIsLoadingRecords] = useState(false);
   const [isRestoringSession, setIsRestoringSession] = useState(true);
 
+  const isBrowser = typeof window !== 'undefined';
+  const shareMatch = isBrowser ? window.location.pathname.match(/^\/share\/([a-fA-F0-9]{40,128}|[a-zA-Z0-9_-]+)$/) : null;
+
   // Load medical records from backend
   const loadMedicalRecords = useCallback(async (userId: number) => {
     console.log('Loading medical records for user ID:', userId);
@@ -124,6 +127,10 @@ const App: React.FC = () => {
       loadMedicalRecords(user.id);
     }
   }, [user?.id, loadMedicalRecords]);
+
+  if (shareMatch) {
+    return <PublicShareRouter />;
+  }
 
   // Show session loader while restoring session
   if (isRestoringSession) {

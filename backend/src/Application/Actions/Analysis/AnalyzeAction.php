@@ -51,6 +51,13 @@ class AnalyzeAction extends Action
         // Get user from JWT token
         $user = $this->getCurrentUser();
         
+        // if ($user->getPoints() <= 0) {
+        //     return $this->respondWithData([
+        //         'error' => 'Bạn không còn điểm để thực hiện phân tích. Vui lòng nạp thêm điểm.',
+        //         'message' => 'Bạn không còn điểm để thực hiện phân tích. Vui lòng nạp thêm điểm.'
+        //     ], 402);
+        // }
+
         $formData = $this->getFormData();
         
         // Validate required fields
@@ -202,7 +209,8 @@ class AnalyzeAction extends Action
                 'record' => $savedRecord,
                 'structuredReport' => $structuredReport,
                 'parsingSuccess' => $parsedResponse['success'],
-                'message' => 'Phân tích hoàn thành thành công'
+                'message' => 'Phân tích hoàn thành thành công',
+                'remainingPoints' => $user->getPoints()
             ];
             
             // Add classification info if available

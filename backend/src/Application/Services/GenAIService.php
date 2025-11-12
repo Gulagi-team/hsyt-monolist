@@ -409,6 +409,63 @@ QUAN TRỌNG: Trả về định dạng JSON phù hợp với loại tài liệu
         return $prompt;
     }
 
+    public function generateChatResponse(string $prompt, array $context = []): string
+    {
+        try {
+            $parts = [];
+
+            if (!empty($context['history'])) {
+                foreach ($context['history'] as $item) {
+                    $parts[] = ['text' => $item];
+                }
+            }
+
+            $parts[] = ['text' => $prompt];
+
+            $requestBody = [
+                'contents' => [
+                    [
+                        'parts' => $parts,
+                    ],
+                ],
+            ];
+
+            $response = $this->httpClient->post('models/gemini-2.5-flash:generateContent', [
+                'query' => ['key' => $this->apiKey],
+                'json' => $requestBody,
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]);
+
+            $responseData = json_decode($response->getBody()->getContents(), true);
+
+            if (isset($responseData['candidates'][0]['content']['parts'][0]['text'])) {
+                return $responseData['candidates'][0]['content']['parts'][0]['text'];
+            }
+
+            $this->logger->error('GenAI API response missing expected text content for chat response', [
+                'response' => $responseData,
+            ]);
+
+            return 'Xin lỗi, tôi chưa thể trả lời câu hỏi này. Vui lòng thử lại sau.';
+        } catch (GuzzleException $e) {
+            $this->logger->error('GenAI API chat request failed', [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ]);
+
+            return 'Xin lỗi, hệ thống đang gặp sự cố. Vui lòng thử lại sau.';
+        } catch (\Exception $e) {
+            $this->logger->error('Unexpected error during GenAI chat response generation', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return 'Xin lỗi, tôi chưa thể trả lời câu hỏi này. Vui lòng thử lại sau.';
+        }
+    }
+
     private function generateContent(string $base64Image, string $mimeType, string $prompt): string
     {
         try {

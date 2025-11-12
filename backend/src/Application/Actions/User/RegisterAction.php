@@ -65,6 +65,7 @@ class RegisterAction extends UserAction
             'O+', // Default blood type
             'Không có', // Default allergies
             'Khỏe mạnh', // Default conditions
+            1, // Default points
             false, // Email not verified initially
             $emailVerificationToken
         );

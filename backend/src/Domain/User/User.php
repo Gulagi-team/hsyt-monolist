@@ -16,6 +16,7 @@ class User implements JsonSerializable
     private string $bloodType;
     private ?string $allergies;
     private ?string $currentConditions;
+    private int $points;
     private bool $emailVerified;
     private ?string $emailVerificationToken;
     private ?string $resetPasswordToken;
@@ -32,6 +33,7 @@ class User implements JsonSerializable
         string $bloodType = 'O+',
         ?string $allergies = null,
         ?string $currentConditions = null,
+        int $points = 1,
         bool $emailVerified = false,
         ?string $emailVerificationToken = null,
         ?string $resetPasswordToken = null,
@@ -47,6 +49,7 @@ class User implements JsonSerializable
         $this->bloodType = $bloodType;
         $this->allergies = $allergies ?: 'Không có';
         $this->currentConditions = $currentConditions ?: 'Khỏe mạnh';
+        $this->points = $points;
         $this->emailVerified = $emailVerified;
         $this->emailVerificationToken = $emailVerificationToken;
         $this->resetPasswordToken = $resetPasswordToken;
@@ -140,6 +143,21 @@ class User implements JsonSerializable
         return $this->currentConditions ?: 'Khỏe mạnh';
     }
 
+    public function getPoints(): int
+    {
+        return $this->points;
+    }
+
+    public function setPoints(int $points): void
+    {
+        $this->points = max(0, $points);
+    }
+
+    public function decrementPoints(int $amount = 1): void
+    {
+        $this->points = max(0, $this->points - max(0, $amount));
+    }
+
     public function getCreatedAt(): string
     {
         return $this->createdAt;
@@ -160,6 +178,7 @@ class User implements JsonSerializable
             'bloodType' => $this->bloodType,
             'allergies' => $this->allergies,
             'currentConditions' => $this->currentConditions,
+            'points' => $this->points,
             'emailVerified' => $this->emailVerified,
             'createdAt' => $this->createdAt,
             'updatedAt' => $this->updatedAt,

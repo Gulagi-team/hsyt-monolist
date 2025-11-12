@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Domain\User\UserRepository;
 use App\Domain\MedicalRecord\MedicalRecordRepository;
+use App\Domain\Chat\ChatHistoryRepository;
 use App\Infrastructure\Persistence\User\DatabaseUserRepository;
 use App\Infrastructure\Persistence\MedicalRecord\DatabaseMedicalRecordRepository;
+use App\Infrastructure\Persistence\Chat\DatabaseChatHistoryRepository;
 use App\Application\Actions\MedicalRecord\CreatePublicShareAction;
 use App\Application\Actions\MedicalRecord\ListPublicSharesAction;
 use App\Application\Actions\MedicalRecord\ViewPublicRecordAction;
@@ -22,6 +24,10 @@ return function (ContainerBuilder $containerBuilder) {
         
         MedicalRecordRepository::class => function (ContainerInterface $c) {
             return new DatabaseMedicalRecordRepository($c->get(PDO::class));
+        },
+
+        ChatHistoryRepository::class => function (ContainerInterface $c) {
+            return new DatabaseChatHistoryRepository($c->get(PDO::class));
         },
 
         UploadAction::class => function (ContainerInterface $c) {
@@ -57,9 +63,17 @@ return function (ContainerBuilder $containerBuilder) {
             $genAIService = $c->get(GenAIService::class);
             $aiContextService = $c->get(\App\Application\Services\AIContextService::class);
             $userRepository = $c->get(UserRepository::class);
+            $chatHistoryRepository = $c->get(ChatHistoryRepository::class);
             $pdo = $c->get(PDO::class);
             
-            return new \App\Application\Actions\Chat\MedicalChatAction($logger, $genAIService, $aiContextService, $userRepository, $pdo);
+            return new \App\Application\Actions\Chat\MedicalChatAction(
+                $logger,
+                $genAIService,
+                $aiContextService,
+                $userRepository,
+                $chatHistoryRepository,
+                $pdo
+            );
         },
 
         // MedicalRecord Actions

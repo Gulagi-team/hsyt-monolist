@@ -40,3 +40,20 @@ export interface UserProfile {
     allergies: string;
     currentConditions: string;
 }
+
+export interface ChatSessionSummary {
+    id: number;
+    title: string | null;
+    startedAt: string;
+    lastActivityAt: string;
+    status: 'active' | 'archived';
+}
+
+export interface ChatMessageItem {
+    id: number;
+    sessionId: number;
+    sender: 'user' | 'ai';
+    message: string;
+    metadata?: Record<string, unknown> | null;
+    createdAt: string;
+}

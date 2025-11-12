@@ -121,23 +121,7 @@ const generateLabReportPDF = async (
   currentY += 10;
 
   // Patient Information (if available)
-  if (labReport.patientInfo.name || labReport.patientInfo.age) {
-    checkPageBreak(30);
-    pdf.setFontSize(14);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('THÔNG TIN BỆNH NHÂN', margin, currentY);
-    currentY += 10;
-
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    if (labReport.patientInfo.name) {
-      currentY = addWrappedText(`Họ tên: ${labReport.patientInfo.name}`, margin, currentY, contentWidth);
-    }
-    if (labReport.patientInfo.age) {
-      currentY = addWrappedText(`Tuổi: ${labReport.patientInfo.age}`, margin, currentY, contentWidth);
-    }
-    currentY += 10;
-  }
+ 
 
   // Test Results Table
   checkPageBreak(50);

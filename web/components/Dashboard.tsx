@@ -6,7 +6,7 @@ import AnalysisResult from './AnalysisResult';
 import ChatPage from './ChatPage';
 import ProfilePage from './ProfilePage';
 import Logo, { LogoIcon } from './Logo';
-import { PlusCircleIcon, ClipboardDocumentListIcon, ChatBubbleLeftRightIcon, UserCircleIcon, ArrowRightOnRectangleIcon, ArrowLeftIcon } from './icons/Icons';
+import { PlusCircleIcon, ClipboardDocumentListIcon, ChatBubbleLeftRightIcon, UserCircleIcon, ArrowRightOnRectangleIcon, ArrowLeftIcon, GlobeAltIcon } from './icons/Icons';
 
 interface DashboardProps {
   user: { name: string };
@@ -127,6 +127,15 @@ const Dashboard: React.FC<DashboardProps> = ({
         <nav className="space-y-2 flex-grow">
           <NavItem view="analysis" label="Upload Hồ Sơ" icon={<PlusCircleIcon className="h-6 w-6" />} />
           <NavItem view="history" label="Lịch sử Hồ sơ" icon={<ClipboardDocumentListIcon className="h-6 w-6" />} />
+          {/* <a
+            href="http://tintuc.hsyt.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors w-full text-left text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+          >
+            <GlobeAltIcon className="h-6 w-6" />
+            <span className="font-medium">Tin tức HSYT</span>
+          </a> */}
           <NavItem view="chat" label="Trò chuyện AI" icon={<ChatBubbleLeftRightIcon className="h-6 w-6" />} />
           <NavItem view="profile" label="Thông tin Cá nhân" icon={<UserCircleIcon className="h-6 w-6" />} />
         </nav>
@@ -165,7 +174,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 p-6 md:p-10 overflow-y-auto pb-24 md:pb-10">
+        <div className="flex-1 p-2 md:p-10 overflow-y-auto pb-24 md:pb-10">
           {renderView()}
         </div>
       </main>
@@ -174,6 +183,15 @@ const Dashboard: React.FC<DashboardProps> = ({
       <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex justify-around p-1 z-50 shadow-t-lg">
         <BottomNavItem view="analysis" label="Phân tích" icon={<PlusCircleIcon />} />
         <BottomNavItem view="history" label="Hồ sơ" icon={<ClipboardDocumentListIcon />} />
+        {/* <a
+          href="http://tintuc.hsyt.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center space-y-1 w-full pt-2 pb-1 transition-colors text-gray-500 dark:text-gray-400 hover:text-blue-500"
+        >
+          <GlobeAltIcon className="h-6 w-6" />
+          <span className="text-xs font-medium">Tin tức</span>
+        </a> */}
         <BottomNavItem view="chat" label="Trò chuyện" icon={<ChatBubbleLeftRightIcon />} />
         <BottomNavItem view="profile" label="Cá nhân" icon={<UserCircleIcon />} />
       </nav>
