@@ -5,6 +5,7 @@ import SessionLoader from './components/SessionLoader';
 import PublicShareRouter from './components/PublicShareRouter';
 import { authService } from './services/authService';
 import { analysisService } from './services/analysisService';
+import { useDarkMode } from './hooks/useDarkMode';
 import type { MedicalRecord, UserProfile } from './types';
 
 const App: React.FC = () => {
@@ -14,6 +15,7 @@ const App: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoadingRecords, setIsLoadingRecords] = useState(false);
   const [isRestoringSession, setIsRestoringSession] = useState(true);
+  const { isDarkMode } = useDarkMode();
 
   const isBrowser = typeof window !== 'undefined';
   const shareMatch = isBrowser ? window.location.pathname.match(/^\/share\/([a-fA-F0-9]{40,128}|[a-zA-Z0-9_-]+)$/) : null;
@@ -138,7 +140,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans">
+    <div className={`min-h-screen bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-200 font-sans ${isDarkMode ? 'dark' : ''}`}>
       {/* Check if this is a public share URL - render first */}
       <PublicShareRouter />
       
