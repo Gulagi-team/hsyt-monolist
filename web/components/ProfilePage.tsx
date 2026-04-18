@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { UserProfile } from '../types';
+import { useDarkMode } from '../hooks/useDarkMode';
+import { SunIcon, MoonIcon } from './icons/Icons';
 
 interface ProfilePageProps {
   profile: UserProfile;
@@ -9,6 +11,7 @@ interface ProfilePageProps {
 const ProfilePage: React.FC<ProfilePageProps> = ({ profile, setProfile }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<UserProfile>(profile);
+    const { isDarkMode, toggleDarkMode } = useDarkMode();
 
     useEffect(() => {
         setFormData(profile);
@@ -60,11 +63,24 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ profile, setProfile }) => {
         <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Thông tin cá nhân</h2>
-                {!isEditing && (
-                    <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">
-                        Chỉnh sửa
+                <div className="flex items-center space-x-3">
+                    <button
+                        onClick={toggleDarkMode}
+                        className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        title={isDarkMode ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+                    >
+                        {isDarkMode ? (
+                            <SunIcon className="w-5 h-5 text-yellow-500" />
+                        ) : (
+                            <MoonIcon className="w-5 h-5 text-blue-600" />
+                        )}
                     </button>
-                )}
+                    {!isEditing && (
+                        <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">
+                            Chỉnh sửa
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 space-y-6">
