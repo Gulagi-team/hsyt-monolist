@@ -16,6 +16,8 @@ interface MedicalRecordRepository
 
     public function deleteRecord(int $id): bool;
 
+    public function bulkDelete(array $ids): bool;
+
     // Public sharing methods
     public function createPublicShare(array $shareData): int;
 

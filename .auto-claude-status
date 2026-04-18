@@ -1,25 +1,25 @@
 {
   "active": true,
-  "spec": "008-add-dark-mode-toggle-to-settings",
-  "state": "building",
+  "spec": "005-add-bulk-operations-for-medical-records",
+  "state": "planning",
   "subtasks": {
-    "completed": 3,
-    "total": 4,
+    "completed": 0,
+    "total": 0,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Integration & Persistence",
+    "current": "Backend - Bulk Delete API",
     "id": null,
-    "total": 1
+    "total": 4
   },
   "workers": {
     "active": 0,
     "max": 1
   },
   "session": {
-    "number": 5,
-    "started_at": "2026-04-18T11:16:40.764575"
+    "number": 2,
+    "started_at": "2026-04-18T12:16:54.602037"
   },
-  "last_update": "2026-04-18T11:21:19.660586"
+  "last_update": "2026-04-18T12:22:21.235921"
 }
