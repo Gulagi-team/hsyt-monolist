@@ -1,15 +1,15 @@
 {
   "active": true,
   "spec": "008-add-dark-mode-toggle-to-settings",
-  "state": "planning",
+  "state": "building",
   "subtasks": {
-    "completed": 0,
-    "total": 0,
+    "completed": 3,
+    "total": 4,
     "in_progress": 1,
     "failed": 0
   },
   "phase": {
-    "current": "Dark Mode Hook",
+    "current": "Integration & Persistence",
     "id": null,
     "total": 1
   },
@@ -18,8 +18,8 @@
     "max": 1
   },
   "session": {
-    "number": 2,
+    "number": 5,
     "started_at": "2026-04-18T11:16:40.764575"
   },
-  "last_update": "2026-04-18T11:18:40.593188"
+  "last_update": "2026-04-18T11:21:19.660586"
 }
