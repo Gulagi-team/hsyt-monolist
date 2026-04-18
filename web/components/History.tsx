@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { MedicalRecord } from '../types';
 import { formatDateTime } from '../utils/dateUtils';
 import { ClipboardDocumentListIcon, DocumentMagnifyingGlassIcon, XMarkIcon, DocumentTextIcon, PillIcon, ShareIcon } from './icons/Icons';
@@ -15,6 +15,10 @@ interface HistoryProps {
 }
 
 const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteRecord, onRefreshRecords, isLoading }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [deletingRecordId, setDeletingRecordId] = useState<string | number | null>(null);
   const [selectedImage, setSelectedImage] = useState<{url: string, title: string} | null>(null);
   const [shareModal, setShareModal] = useState<{isOpen: boolean, recordId: string | number | null, recordName: string}>({
@@ -22,6 +26,32 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
     recordId: null,
     recordName: ''
   });
+
+  const filteredRecords = useMemo(() => {
+    return records.filter((record) => {
+      // Search term filter
+      const matchesSearch = record.recordName
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      // Type filter
+      const matchesType = filterType === 'all' || record.type === filterType;
+
+      // Date range filter
+      const recordDate = new Date(record.createdAt);
+      const matchesStartDate = !startDate || recordDate >= new Date(startDate);
+
+      // End date should include the whole day, so we set it to the end of the day
+      let matchesEndDate = true;
+      if (endDate) {
+        const endDateTime = new Date(endDate);
+        endDateTime.setHours(23, 59, 59, 999);
+        matchesEndDate = recordDate <= endDateTime;
+      }
+
+      return matchesSearch && matchesType && matchesStartDate && matchesEndDate;
+    });
+  }, [records, searchTerm, filterType, startDate, endDate]);
 
   const handleShare = (recordId: string | number, recordName: string, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent triggering onSelectRecord
@@ -112,6 +142,9 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
       </div>
     );
   }
+
+  const hasActiveFilters = searchTerm || filterType !== 'all' || startDate || endDate;
+  const showEmptyState = filteredRecords.length === 0 && hasActiveFilters;
   
   return (
     <div className="space-y-6">
@@ -137,7 +170,68 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
               {isLoading ? 'Đang tải...' : 'Làm mới'}
             </button>
           </div>
-          
+
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="relative flex-grow">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên hồ sơ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200 shadow-sm"
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm transition-all duration-200"
+              >
+                <option value="all">Tất cả loại hồ sơ</option>
+                <option value="lab_result">Xét nghiệm</option>
+                <option value="prescription">Toa thuốc</option>
+                <option value="diagnostic_imaging">Chẩn đoán hình ảnh</option>
+                <option value="medical_document">Tài liệu khác</option>
+              </select>
+            </div>
+            <div className="flex flex-row gap-2 items-center">
+              <div className="relative">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="block w-full pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200 shadow-sm"
+                  placeholder="Từ ngày"
+                />
+              </div>
+              <span className="text-gray-500 dark:text-gray-400"> đến </span>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="block w-full pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200 shadow-sm"
+                  placeholder="Đến ngày"
+                />
+              </div>
+              {(startDate || endDate) && (
+                <button
+                  onClick={() => { setStartDate(''); setEndDate(''); }}
+                  className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                  title="Xóa bộ lọc ngày"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Statistics */}
           {/* <div className="grid grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl border border-blue-200 dark:border-blue-700/50 hover:shadow-md transition-shadow duration-200">
@@ -198,9 +292,34 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
               </div>
             ))}
           </div>
+        ) : showEmptyState ? (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-12 text-center border-2 border-dashed border-gray-300 dark:border-gray-600">
+            <div className="max-w-md mx-auto">
+              <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Không tìm thấy hồ sơ</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Không tìm thấy hồ sơ nào khớp với bộ lọc của bạn. Thử thay đổi từ khóa hoặc bộ lọc khác.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterType('all');
+                  setStartDate('');
+                  setEndDate('');
+                }}
+                className="text-blue-600 dark:text-blue-400 font-medium hover:underline"
+              >
+                Xóa tất cả bộ lọc
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
-            {records.map((record) => (
+            {filteredRecords.map((record) => (
             <div key={record.id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden flex flex-row lg:flex-col hover:shadow-xl transition-shadow duration-300">
                 {/* Preview Section */}
                 {(record.fileUrl || record.r2Url) ? (
