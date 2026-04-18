@@ -14,6 +14,7 @@ use App\Application\Actions\MedicalRecord\CreatePublicShareAction;
 use App\Application\Actions\MedicalRecord\ListPublicSharesAction;
 use App\Application\Actions\MedicalRecord\ViewPublicRecordAction;
 use App\Application\Actions\MedicalRecord\DisablePublicShareAction;
+use App\Application\Actions\MedicalRecord\BulkDeleteRecordsAction;
 use App\Application\Actions\Analysis\AnalyzeAction;
 use App\Application\Actions\Upload\UploadAction;
 use App\Application\Actions\Chat\MedicalChatAction;
@@ -54,6 +55,7 @@ return function (App $app) {
         $group->post('/records', CreateRecordAction::class);
         $group->get('/records/{id}', GetRecordAction::class);
         $group->delete('/records/{id}', DeleteRecordAction::class);
+        $group->delete('/records/bulk-delete', BulkDeleteRecordsAction::class);
 
         // Public sharing routes (require authentication)
         $group->post('/medical-records/{recordId}/share', CreatePublicShareAction::class);
