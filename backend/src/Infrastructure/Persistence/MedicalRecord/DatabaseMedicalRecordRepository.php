@@ -172,7 +172,21 @@ class DatabaseMedicalRecordRepository implements MedicalRecordRepository
         $query = 'DELETE FROM medical_records WHERE id = :id';
         $statement = $this->connection->prepare($query);
         $statement->execute(['id' => $id]);
-        
+
+        return $statement->rowCount() > 0;
+    }
+
+    public function bulkDelete(array $ids): bool
+    {
+        if (empty($ids)) {
+            return true;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $query = "DELETE FROM medical_records WHERE id IN ($placeholders)";
+        $statement = $this->connection->prepare($query);
+        $statement->execute($ids);
+
         return $statement->rowCount() > 0;
     }
 
