@@ -15,6 +15,7 @@ interface HistoryProps {
 }
 
 const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteRecord, onRefreshRecords, isLoading }) => {
+  const [searchTerm, setSearchTerm] = useState('');
   const [deletingRecordId, setDeletingRecordId] = useState<string | number | null>(null);
   const [selectedImage, setSelectedImage] = useState<{url: string, title: string} | null>(null);
   const [shareModal, setShareModal] = useState<{isOpen: boolean, recordId: string | number | null, recordName: string}>({
@@ -137,7 +138,25 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
               {isLoading ? 'Đang tải...' : 'Làm mới'}
             </button>
           </div>
-          
+
+          {/* Search and Filters */}
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="relative flex-grow">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên hồ sơ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200 shadow-sm"
+              />
+            </div>
+          </div>
+
           {/* Statistics */}
           {/* <div className="grid grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl border border-blue-200 dark:border-blue-700/50 hover:shadow-md transition-shadow duration-200">
