@@ -6,7 +6,8 @@ import AnalysisResult from './AnalysisResult';
 import ChatPage from './ChatPage';
 import ProfilePage from './ProfilePage';
 import Logo, { LogoIcon } from './Logo';
-import { PlusCircleIcon, ClipboardDocumentListIcon, ChatBubbleLeftRightIcon, UserCircleIcon, ArrowRightOnRectangleIcon, ArrowLeftIcon, GlobeAltIcon } from './icons/Icons';
+import { PlusCircleIcon, ClipboardDocumentListIcon, ChatBubbleLeftRightIcon, UserCircleIcon, ArrowRightOnRectangleIcon, ArrowLeftIcon, GlobeAltIcon, SunIcon, MoonIcon } from './icons/Icons';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 interface DashboardProps {
   user: { name: string };
@@ -44,6 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [currentView, setCurrentView] = useState<View>('analysis');
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const handleSelectRecord = (recordId: string) => {
     const record = records.find(r => r.id === recordId);
@@ -141,14 +143,27 @@ const Dashboard: React.FC<DashboardProps> = ({
         </nav>
         
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-            <div className="flex items-center space-x-3 mb-4 p-2">
-                <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                    <UserCircleIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+            <div className="flex items-center justify-between mb-4 p-2">
+                <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                        <UserCircleIcon className="h-6 w-6 text-gray-500 dark:text-gray-400" />
+                    </div>
+                    <div>
+                        <p className="font-semibold text-gray-800 dark:text-gray-100">{user.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Patient</p>
+                    </div>
                 </div>
-                <div>
-                    <p className="font-semibold text-gray-800 dark:text-gray-100">{user.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Patient</p>
-                </div>
+                <button
+                    onClick={toggleDarkMode}
+                    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    title={isDarkMode ? 'Chế độ sáng' : 'Chế độ tối'}
+                >
+                    {isDarkMode ? (
+                        <SunIcon className="w-5 h-5 text-yellow-500" />
+                    ) : (
+                        <MoonIcon className="w-5 h-5 text-blue-600" />
+                    )}
+                </button>
             </div>
             <button
                 onClick={onLogout}
@@ -169,7 +184,16 @@ const Dashboard: React.FC<DashboardProps> = ({
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {viewTitles[currentView]}
                 </h1>
-                <div className="w-6"></div> {/* Spacer for centering */}
+                <button
+                    onClick={toggleDarkMode}
+                    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                    {isDarkMode ? (
+                        <SunIcon className="w-5 h-5 text-yellow-500" />
+                    ) : (
+                        <MoonIcon className="w-5 h-5 text-blue-600" />
+                    )}
+                </button>
             </div>
         </header>
 
