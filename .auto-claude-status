@@ -4,6 +4,10 @@
   "state": "building",
   "subtasks": {
     "completed": 2,
+  "spec": "008-add-dark-mode-toggle-to-settings",
+  "state": "building",
+  "subtasks": {
+    "completed": 3,
     "total": 4,
     "in_progress": 1,
     "failed": 0
@@ -12,6 +16,9 @@
     "current": "Search & Filter UI",
     "id": null,
     "total": 3
+    "current": "Integration & Persistence",
+    "id": null,
+    "total": 1
   },
   "workers": {
     "active": 0,
@@ -22,4 +29,8 @@
     "started_at": "2026-04-18T11:46:19.785771"
   },
   "last_update": "2026-04-18T11:52:08.840563"
+    "number": 5,
+    "started_at": "2026-04-18T11:16:40.764575"
+  },
+  "last_update": "2026-04-18T11:21:19.660586"
 }

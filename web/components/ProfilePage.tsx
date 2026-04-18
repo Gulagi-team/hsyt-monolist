@@ -60,11 +60,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ profile, setProfile }) => {
         <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Thông tin cá nhân</h2>
-                {!isEditing && (
-                    <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">
-                        Chỉnh sửa
-                    </button>
-                )}
+                <div className="flex items-center space-x-3">
+                    {!isEditing && (
+                        <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium">
+                            Chỉnh sửa
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 space-y-6">
