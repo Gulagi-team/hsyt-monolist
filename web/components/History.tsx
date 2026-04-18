@@ -16,6 +16,7 @@ interface HistoryProps {
 
 const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteRecord, onRefreshRecords, isLoading }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<string>('all');
   const [deletingRecordId, setDeletingRecordId] = useState<string | number | null>(null);
   const [selectedImage, setSelectedImage] = useState<{url: string, title: string} | null>(null);
   const [shareModal, setShareModal] = useState<{isOpen: boolean, recordId: string | number | null, recordName: string}>({
@@ -154,6 +155,19 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200 shadow-sm"
               />
+            </div>
+            <div className="flex-shrink-0">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm transition-all duration-200"
+              >
+                <option value="all">Tất cả loại hồ sơ</option>
+                <option value="lab_result">Xét nghiệm</option>
+                <option value="prescription">Toa thuốc</option>
+                <option value="diagnostic_imaging">Chẩn đoán hình ảnh</option>
+                <option value="medical_document">Tài liệu khác</option>
+              </select>
             </div>
           </div>
 
