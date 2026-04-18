@@ -17,6 +17,8 @@ interface HistoryProps {
 const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteRecord, onRefreshRecords, isLoading }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [deletingRecordId, setDeletingRecordId] = useState<string | number | null>(null);
   const [selectedImage, setSelectedImage] = useState<{url: string, title: string} | null>(null);
   const [shareModal, setShareModal] = useState<{isOpen: boolean, recordId: string | number | null, recordName: string}>({
@@ -168,6 +170,36 @@ const History: React.FC<HistoryProps> = ({ records, onSelectRecord, onDeleteReco
                 <option value="diagnostic_imaging">Chẩn đoán hình ảnh</option>
                 <option value="medical_document">Tài liệu khác</option>
               </select>
+            </div>
+            <div className="flex flex-row gap-2 items-center">
+              <div className="relative">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="block w-full pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200 shadow-sm"
+                  placeholder="Từ ngày"
+                />
+              </div>
+              <span className="text-gray-500 dark:text-gray-400"> đến </span>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="block w-full pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200 shadow-sm"
+                  placeholder="Đến ngày"
+                />
+              </div>
+              {(startDate || endDate) && (
+                <button
+                  onClick={() => { setStartDate(''); setEndDate(''); }}
+                  className="p-2 text-gray-500 hover:text-red-500 transition-colors"
+                  title="Xóa bộ lọc ngày"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                </button>
+              )}
             </div>
           </div>
 
